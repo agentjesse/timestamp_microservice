@@ -51,7 +51,8 @@ app.post("/dreams", (request, response)=> {
   dreams.push(request.body.todo)
 })
 
-// listen for requests :)
-var listener = app.listen(process.env.PORT, function () {
-  console.log('Your app is listening on port ' + listener.address().port)
+// listen for requests. uncomment line depending on server. choose first for glitch, as the .env files with the port will become available when their site hosts the app. or use the second when running this app locally
+// var listener = app.listen(process.env.PORT, function () {
+const listener = app.listen( 5000, function () {
+  console.log('Listening on port: ' + listener.address().port)
 })
