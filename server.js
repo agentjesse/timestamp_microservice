@@ -1,22 +1,19 @@
 // node/express app starts here!
 
-// const querystring = require('querystring')
 const express = require('express')
 const moment = require('moment')
-// const bodyParser = require('body-parser')
 const app = express()
-
-// app.use(bodyParser.urlencoded({ extended: false })); //https://github.com/expressjs/body-parser
 
 //this middleware handles all requests to server. can also just use app.use(fn)
 app.all('*', (req,res,next)=>{
   let unixTimestamp, naturalDate
-  let inputStr = req.originalUrl.slice(1).replace(/%20/g,' ')
+  //grab the input from the url while handling spaces
+  const inputStr = req.originalUrl.slice(1).replace(/%20/g,' ')
 
   //create a local moment from a Unix timestamp (seconds since the Unix Epoch) from str or num, use utc mode, then format display
   // console.log( moment.unix('1450137600').utc().format('MMMM Do, YYYY') )
 
-  //check if the provided string will return a valid 'moment' date when parsed as a unix timestamp or natural date
+  //check if the input is actually a date in either format
   if( !moment.unix(inputStr).isValid() && !moment(inputStr,
     [
       'M-D-YY','M D YY',
@@ -30,12 +27,13 @@ app.all('*', (req,res,next)=>{
     //respond with an object as a json encoded string. send() is smart enough to handle it instead of res.json()
     res.send( { unix:null, natural:null } )
   }
+  //the input is valid, respond accordingly
   else {
     // check if the input was a number, signed or not
     if ( /^-?[0-9]+$/.test(inputStr) ) {
-      console.log('received unix timestamp: ', inputStr)
+      // console.log('received unix timestamp: ', inputStr)
       //set vars accordingly, to use in response object
-      unixTimestamp = moment.unix(inputStr).utc().unix()
+      unixTimestamp = moment.unix(inputStr).utc().unix() //you could also just display as a string directly
       naturalDate = moment.unix(inputStr).utc().format('MMMM Do, YYYY')
     }
     //received a non unix date...
