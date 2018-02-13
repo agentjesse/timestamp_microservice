@@ -13,9 +13,8 @@ app.all('*', (req,res,next)=>{
   let unixTimestamp, naturalDate
   let inputStr = req.originalUrl.slice(1).replace(/%20/g,' ')
 
-  //create a local moment from a Unix timestamp (seconds since the Unix Epoch),convert to utc, then format display
+  //create a local moment from a Unix timestamp (seconds since the Unix Epoch) from str or num, use utc mode, then format display
   // console.log( moment.unix('1450137600').utc().format('MMMM Do, YYYY') )
-  // console.log( moment.unix(inputStr).utc().format('MMMM Do, YYYY') )
 
   //check if the provided string will return a valid 'moment' date when parsed as a unix timestamp or natural date
   if( !moment.unix(inputStr).isValid() && !moment(inputStr,
