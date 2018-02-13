@@ -8,7 +8,7 @@ const app = express()
 
 // app.use(bodyParser.urlencoded({ extended: false })); //https://github.com/expressjs/body-parser
 
-//this middleware is acting as an endpoint that handles all requests to server.
+//this middleware handles all requests to server. can also just use app.use(fn)
 app.all('*', (req,res,next)=>{
   let unixTimestamp, naturalDate
   let inputStr = req.originalUrl.slice(1).replace(/%20/g,' ')
@@ -17,7 +17,7 @@ app.all('*', (req,res,next)=>{
   // console.log( moment.unix('1450137600').utc().format('MMMM Do, YYYY') )
   // console.log( moment.unix(inputStr).utc().format('MMMM Do, YYYY') )
 
-  //check if the provided string will return a valid 'moment' date when parsed
+  //check if the provided string will return a valid 'moment' date when parsed as a unix timestamp or natural date
   if( !moment.unix(inputStr).isValid() && !moment(inputStr,
     [
       'M-D-YY','M D YY',
@@ -28,13 +28,22 @@ app.all('*', (req,res,next)=>{
       'MMMM-D-YYYY','MMMM D YYYY'
     ],true)
     .isValid() ) {
-    res.send('server did not receive a date')
+    //respond with an object as a json encoded string. send() is smart enough to handle it instead of res.json()
+    res.send( { unix:null, natural:null } )
   }
   else {
-    //set values for properties in the response object
-    unixTimestamp = moment.unix(inputStr).utc().unix()
-    //accepts string dates as month-day-year delimited by spaces or hyphens
-    naturalDate = moment.utc(inputStr,
+    // check if the input was a number, signed or not
+    if ( /^-?[0-9]+$/.test(inputStr) ) {
+      console.log('received unix timestamp: ', inputStr)
+      //set vars accordingly, to use in response object
+      unixTimestamp = moment.unix(inputStr).utc().unix()
+      naturalDate = moment.unix(inputStr).utc().format('MMMM Do, YYYY')
+    }
+    //received a non unix date...
+    else{
+      //set vars accordingly, to use in response object
+      //accepts string dates as month-day-year delimited by spaces or hyphens
+      naturalDate = moment.utc(inputStr,
       [
         'M-D-YY','M D YY',
         'MMM-D-YY','MMM D YY',
@@ -44,6 +53,18 @@ app.all('*', (req,res,next)=>{
         'MMMM-D-YYYY','MMMM D YYYY'
       ],true)
       .format('MMMM Do, YYYY')
+      unixTimestamp = moment.utc(inputStr,
+        [
+          'M-D-YY','M D YY',
+          'MMM-D-YY','MMM D YY',
+          'MMMM-D-YY','MMMM D YY',
+          'M-D-YYYY','M D YYYY',
+          'MMM-D-YYYY','MMM D YYYY',
+          'MMMM-D-YYYY','MMMM D YYYY'
+        ],true).unix()
+
+    }
+
     //respond with an object as a json encoded string. send() is smart enough to handle it instead of res.json()
     res.send( { unix:unixTimestamp, natural:naturalDate } )
   }
