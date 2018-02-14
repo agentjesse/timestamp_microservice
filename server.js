@@ -2,7 +2,7 @@
 
 const express = require('express')
 const moment = require('moment')
-path = require('path')
+const path = require('path')
 const app = express()
 
 //specify template engine for express to use
